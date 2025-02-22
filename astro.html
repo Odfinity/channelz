@@ -1,81 +1,165 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-    <script src="https://ssl.p.jwpcdn.com/player/v/8.32.1/jwplayer.js" type="text/javascript"></script>
-    <meta charset="UTF-8">
+    <title>Astro</title>
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/2048px-Telegram_logo.svg.png" type="image/png" sizes="250x250">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.1.1/shaka-player.ui.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.1.1/controls.min.css" crossorigin="anonymous">
+    <link rel="preload" href="https://sg-cors.onrender.com/https://linearjitp-playback.astro.com.my/dash-wv/linear/2504/default_primary.mpd" as="fetch" crossorigin="anonymous">
+
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: black;
+        /* Overflow menu style */
+        .shaka-overflow-menu {
+            background-color: rgb(41, 41, 163);
+            color: rgb(153, 153, 153);
         }
 
-        #player-container {
-            max-height: 100%;
-            min-height: 100%;
-            max-width: 100%;
-            min-width: 100%;
-            aspect-ratio: 16 / 9;
-            margin: 10px 0;
+        .shaka-overflow-menu button:hover {
+            background-color: rgb(45, 45, 45);
         }
 
-        /* Custom scrollbar styles */
-        body::-webkit-scrollbar {
-            width: 8px;
-            background-color: rgba(0, 0, 0, 0.7);
+        .shaka-overflow-button-label {
+            color: rgb(245, 245, 245);
         }
 
-        body::-webkit-scrollbar-thumb {
-            border-radius: 10px;
-            background-color: rgba(140, 140, 140, 0.5);
+        .shaka-current-selection-span {
+            color: rgb(202, 202, 202);
         }
 
-        body::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(140, 140, 140, 0.7);
+        .material-icons-round {
+            color: rgb(230, 230, 230);
         }
 
-        .ad-container {
-            margin: 10px 0;
-            text-align: center;
+        /* Overflow sub menu style */
+        .shaka-settings-menu {
+            background-color: rgb(35, 35, 35);
+            color: rgb(255, 255, 255);
+        }
+
+        .shaka-settings-menu button {
+            color: rgb(255, 255, 255);
+        }
+
+        .shaka-settings-menu button:hover {
+            background-color: rgb(45, 45, 45);
         }
     </style>
 </head>
 
-    <div id="player-container"></div>
+<body bgcolor="black" style="margin:0">
+    <center>
+        <div data-shaka-player-container style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">
+            <video autoplay muted playsinline data-shaka-player id="video"
+                   poster="https://i.ibb.co/4nkJF7Dd/Axtream-Bingewav.png?width=1920&height=1080&mode=max&slimmage=true"
+                   style="width:100%;height:100%"></video>
+        </div>
+    </center>
 
+    <script>
 
-    <script type="text/javascript">
-        function _0x136e(_0x3ec4bb,_0x25f18f){var _0x2de87a=_0x1ef0();return _0x136e=function(_0x5eee31,_0x528de2){_0x5eee31=_0x5eee31-(0x1996+0x19ce+-0x317c);var _0xbb3c20=_0x2de87a[_0x5eee31];return _0xbb3c20;},_0x136e(_0x3ec4bb,_0x25f18f);}function _0x1ef0(){var _0x298c15=['t.mpd','Logo.jpg?p','twitter','facebook','key','re.com/med','white','ro.com.my/','644408tkltJb','cd84ed136b','9b5dbc865f','16:9','52370qXmDTd','8159f9f0ce','ia/1919551','100%','03c2e0af2f','tK17QNb+4+','https://mm','52640yQXvUW','203340wVERTW','a.prnewswi','player-con','nder.com/h','XSuP4qMl+9','tainer','auto','ttps://lin','=facebook','cd4d4f6a2e','/WillowTV_','384EyNJhv','earjitp-pl','O/cYH8CI0H','near/2504/','default_ot','setup','ayback.ast','-cors.onre','1214DXvfyW','th2Pm9AWgM','1071wsKfKV','650133wEkXeF','43897zGcBtu','dash-wv/li','0cc71f8ab8','GGr7bdjo','16px','12ORYfTx','https://sg'];_0x1ef0=function(){return _0x298c15;};return _0x1ef0();}var _0x42da8a=_0x136e;(function(_0x233d04,_0x4a9deb){var _0x3200f1=_0x136e,_0xb23995=_0x233d04();while(!![]){try{var _0x46cf2b=-parseInt(_0x3200f1(0x1ed))/(-0x1*0x1d8+-0x10*-0x159+0x1*-0x13b7)+parseInt(_0x3200f1(0x20b))/(0x3d*-0x6c+0x14c6+0x4f8)+-parseInt(_0x3200f1(0x1f0))/(-0x7bb*0x5+0x2e3*-0x4+0x3236)+parseInt(_0x3200f1(0x200))/(-0x10a3+0x1*0x4be+0xbe9)+-parseInt(_0x3200f1(0x20c))/(-0x11ec*-0x1+-0x212b+-0x2*-0x7a2)*(parseInt(_0x3200f1(0x1f6))/(0x10*0xa+0x1*0x577+-0x1*0x611))+-parseInt(_0x3200f1(0x1f1))/(-0x1786+0x889+0x2*0x782)*(parseInt(_0x3200f1(0x217))/(-0x1e0b+0x235+0x1bde))+parseInt(_0x3200f1(0x1ef))/(0x5*-0x6a9+0x2493+-0x33d)*(parseInt(_0x3200f1(0x204))/(0x21db+0x4*-0x5e5+-0xa3d));if(_0x46cf2b===_0x4a9deb)break;else _0xb23995['push'](_0xb23995['shift']());}catch(_0x17f0b9){_0xb23995['push'](_0xb23995['shift']());}}}(_0x1ef0,-0x166d*-0x23+0x1*0x5b0bf+0x193*-0x386),jwplayer[_0x42da8a(0x1fc)]=_0x42da8a(0x210)+_0x42da8a(0x209)+_0x42da8a(0x1ee)+_0x42da8a(0x219)+_0x42da8a(0x1f4),jwplayer(_0x42da8a(0x20e)+_0x42da8a(0x211))[_0x42da8a(0x1ea)]({'file':_0x42da8a(0x1f7)+_0x42da8a(0x1ec)+_0x42da8a(0x20f)+_0x42da8a(0x213)+_0x42da8a(0x218)+_0x42da8a(0x1eb)+_0x42da8a(0x1ff)+_0x42da8a(0x1f2)+_0x42da8a(0x1e8)+_0x42da8a(0x1e9)+_0x42da8a(0x1f8),'aspectratio':_0x42da8a(0x203),'width':_0x42da8a(0x207),'autostart':!![],'image':_0x42da8a(0x20a)+_0x42da8a(0x20d)+_0x42da8a(0x1fd)+_0x42da8a(0x206)+_0x42da8a(0x216)+_0x42da8a(0x1f9)+_0x42da8a(0x214),'mute':![],'preload':_0x42da8a(0x212),'captions':{'color':_0x42da8a(0x1fe),'fontSize':_0x42da8a(0x1f5),'backgroundOpacity':0x0},'sharing':{'sites':[_0x42da8a(0x1fb),_0x42da8a(0x1fa)]},'drm':{'clearkey':{'keyId':_0x42da8a(0x208)+_0x42da8a(0x205)+_0x42da8a(0x202)+'10','key':_0x42da8a(0x201)+_0x42da8a(0x1f3)+_0x42da8a(0x215)+'4c'}}}));
+        async function init() {let e = document.getElementById("video"),r = e.ui,n = r.getControls(),o = n.getPlayer();o.configure({drm:{clearKeys:{"03c2e0af2f8159f9f0ce9b5dbc865f10":"cd84ed136b0cc71f8ab8cd4d4f6a2e4c"}},streaming: {startAtSegmentBoundary: true,ignoreTextStreamFailures: true, rebufferingGoal: 1,bufferingGoal: 3,bufferBehind: 5, autoLowLatencyMode: true, lowLatencyMode: true, jumpLargeGaps: true, inaccurateManifestTolerance: 0.3, stallEnabled: false},manifest: {dash: {ignoreMinBufferTime: true, autoCorrectDrift: true}}});r.configure({
+                controlPanelElements: ["play_pause", "mute", "volume", "spacer", "time_and_duration", "quality", "picture_in_picture", "fullscreen", "overflow_menu"],
+                volumeBarColors: { base: 'rgba(235, 235, 235, 1)', level: 'rgb(255, 255, 255)' },
+                seekBarColors: { base: 'rgb(199, 199, 199)', buffered: 'rgb(255, 255, 255)', played: 'rgba(255, 255, 255, 1)' }
+            });
 
-        // Ensure playback compatibility for mobile devices
-        jwplayer().on('ready', function () {
-            const player = document.querySelector('#player-container');
-            if (player) {
-                player.style.height = window.innerHeight + 'px';
+            window.player = o;
+            window.ui = r;
+
+            o.addEventListener("error", onPlayerErrorEvent);
+            n.addEventListener("error", onUIErrorEvent);
+
+            // Load the video as quickly as possible
+            try {
+                await o.load("https://sg-cors.onrender.com/https://linearjitp-playback.astro.com.my/dash-wv/linear/2504/default_primary.mpd");
+                console.log("The video has now been loaded instantly!");
+            } catch (a) {
+                onPlayerError(a);
             }
-        });
+        }
 
-        jwplayer().on('play', function () {
-            document.body.style.backgroundColor = "#000";
-        });
+        function onPlayerErrorEvent(e) {
+            onPlayerError(e.detail);
+        }
 
-        jwplayer().on('error', function (e) {
-            console.error("Playback error:", e.message);
-        });
+        function onPlayerError(e) {
+            console.error("Error code", e.code, "object", e);
+        }
+
+        function onUIErrorEvent(e) {
+            onPlayerError(e.detail);
+        }
+
+        function initFailed(e) {
+            console.error("Unable to load the UI library!");
+        }
+
+        document.addEventListener("shaka-ui-loaded", init);
+        document.addEventListener("shaka-ui-load-failed", initFailed);
+    </script>
+    <script>
+ // Close popup function
+ function closePopup() {
+    const popup = document.getElementById('popup');
+    popup.style.display = 'none';
+  }
+      // Show the alert
+      if (confirm("Join Our Telegram Channel @Axtream_Bingewav for updates and more")) {
+          // Redirect to the Telegram channel if 'OK' is clicked
+          window.location.href = "https://t.me/axtream_bingewav";
+      } else {
+          // Close the alert if 'Cancel' is clicked (do nothing)
+      }
+
+
+(function() {
+    const allowedDomains = [
+        "bingewav-sports.netlify.app",
+        "cricstreamline365.netlify.app",
+        "editverseog.netlify.app",
+        "cricket-nation.live",
+        "cricketgroup.netlify.app",
+        "crxcshivam.live",
+        "binge-play.vercel.app",
+        "champions-trophy.vercel.app",
+        "sportifylive18.pages.dev"
+    ];
+
+    try {
+        // Check if the page is embedded in an iframe
+        if (window.top !== window.self) {
+            // Extract the referrer domain
+            const referrer = document.referrer;
+            if (referrer) {
+                const referrerDomain = new URL(referrer).hostname;
+
+                // Allow embedding only if the domain is in the allowed list
+                if (!allowedDomains.includes(referrerDomain)) {
+                    document.body.innerHTML = `<h1 style="text-align:center; margin-top:20%; color:red;">Embedding not allowed!</h1>`;
+                    throw new Error("Embedding not allowed on this domain.");
+                }
+            } else {
+                // No referrer, block embedding
+                document.body.innerHTML = `<h1 style="text-align:center; margin-top:20%; color:red;">Embedding not allowed!</h1>`;
+                throw new Error("Embedding not allowed! No referrer detected.");
+            }
+        }
+    } catch (error) {
+        console.error("Error checking embed permissions:", error);
+        document.body.innerHTML = `<div style="text-align:center; margin-top:20%; color:#ff3333; font-family:Arial, sans-serif;">
+        <h1>Access Denied</h1>
+        <p><h2>This page cannot be embedded on your site.</h2></p>
+        <p><h2>For more information and to allow embeding on this domain, please contact the administrator <a href="https://t.me/axtream_bingewav" target="_blank" style="text-decoration: none; color: #ff00bb">@Axtream_Bingewav</a>.</h2></p>
+    </div>`;
+    }
+})();
     </script>
 
 
+<script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script>
 </body>
-    <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool@latest'></script>
-    <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool@latest'></script>
 
 </html>
