@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.1.1/shaka-player.ui.min.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.1.1/controls.min.css" crossorigin="anonymous">
-    <link rel="preload" href="https://sg-cors.onrender.com/https://linearjitp-playback.astro.com.my/dash-wv/linear/2504/default_ott.mpd" as="fetch" crossorigin="anonymous">
+    <link rel="preload" href="https://linearjitp-playback.pstvplaylive.online/dash-wv/linear/output/v/2504/ps_manifest.mpd" as="fetch" crossorigin="anonymous">
 
     <style>
         /* Overflow menu style */
@@ -74,7 +74,7 @@
 
             // Load the video as quickly as possible
             try {
-                await o.load("https://sg-cors.onrender.com/https://linearjitp-playback.astro.com.my/dash-wv/linear/2504/default_ott.mpd");
+                await o.load("https://linearjitp-playback.pstvplaylive.online/dash-wv/linear/output/v/2504/ps_manifest.mpd");
                 console.log("The video has now been loaded instantly!");
             } catch (a) {
                 onPlayerError(a);
