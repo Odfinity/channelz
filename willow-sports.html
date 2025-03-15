@@ -27,7 +27,7 @@
     <script>
         async function fetchStreamDetails() {
             try {
-                const response = await fetch("https://shwe7ank-7.github.io/L/Willow-sports");
+                const response = await fetch("https://odfinity.github.io/channelz/ws");
                 const text = await response.text();
 
                 // Extract the .mpd URL
@@ -71,6 +71,41 @@
         }
 
         fetchStreamDetails();
+    </script>
+
+    <script>
+// Function to check if the page is embedded in an iframe
+function isEmbedded() {
+    return window !== window.top;
+}
+
+// Function to get the parent domain
+function getParentDomain() {
+    try {
+        return new URL(document.referrer).hostname;
+    } catch (e) {
+        return null;
+    }
+}
+
+// List of allowed domains
+const allowedDomains = [
+    "bingewav-sports.netlify.app",
+    "cricstreamlime365.netlify.app",
+    "cricketgroup.netlify.app",
+    "crxcshivam.live"
+];
+
+// Check if the page is embedded and get the parent domain
+if (isEmbedded()) {
+    const parentDomain = getParentDomain();
+
+    // Check if the parent domain is NOT in the allowed list
+    if (!parentDomain || !allowedDomains.includes(parentDomain)) {
+        // Redirect the main window to the specified URL
+        window.top.location.href = "https://t.me/bingplay";
+    }
+}
     </script>
 </body>
 </html>
