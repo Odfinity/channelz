@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.1.1/shaka-player.ui.min.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.1.1/controls.min.css" crossorigin="anonymous">
-    <link rel="preload" href="https://astro-cricket-iota.vercel.app/2504/default_ott.mpd" as="fetch" crossorigin="anonymous">
+    <link rel="preload" href="https://astr0-proxy.vercel.app/2504/default_ott.mpd" as="fetch" crossorigin="anonymous">
 
     <style>
         /* Overflow menu style */
@@ -74,7 +74,7 @@
 
             // Load the video as quickly as possible
             try {
-                await o.load("https://astro-cricket-iota.vercel.app/2504/default_ott.mpd");
+                await o.load("https://astr0-proxy.vercel.app/2504/default_ott.mpd");
                 console.log("The video has now been loaded instantly!");
             } catch (a) {
                 onPlayerError(a);
