@@ -1,133 +1,440 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.ui.min.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/controls.min.css" crossorigin="anonymous">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body {
-      background: #000;
-      height: 100vh;
-      width: 100vw;
-      overflow: hidden;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-    .shaka-video-container {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-    }
-    video {
-      width: 100%;
-      height: 100%;
-      background: #000;
-      object-fit: contain;
-    }
-    .shaka-spinner-container,
-    .shaka-spinner,
-    .shaka-spinner-svg {
-      display: none !important;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JioTV Player</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.ui.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/controls.min.css" crossorigin="anonymous">
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .shaka-video-container {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+        
+        video {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            object-fit: contain;
+        }
+        
+        .channel-info {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            z-index: 10;
+            transition: opacity 0.3s ease;
+            opacity: 1;
+        }
+        
+        .channel-info.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .channel-logo {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+            border-radius: 8px;
+            background: #222;
+        }
+        
+        .channel-name {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .channel-id {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 2px;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.2rem;
+            text-align: center;
+            z-index: 5;
+        }
+        
+        .error {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff4444;
+            font-size: 1.2rem;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+        
+        .error.hidden {
+            display: none;
+        }
+        
+        .shaka-spinner-container,
+        .shaka-spinner,
+        .shaka-spinner-svg {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+        }
+        
+        .control-hint {
+            position: absolute;
+            bottom: 70px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .shaka-video-container:hover .control-hint {
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>
-  <div class="shaka-video-container" data-shaka-player>
-    <video autoplay playsinline preload="metadata"
-      poster="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiii7YNuRJBQ43RMlbokkmeBefH1FnRTS8zOQmr0K4MA&s=10"></video>
-  </div>
+    <div class="channel-info" id="channelInfo">
+        <img class="channel-logo" id="channelLogo" src="" alt="Channel Logo" onerror="this.style.display='none'">
+        <div>
+            <div class="channel-name" id="channelName">Loading Channel...</div>
+            <div class="channel-id" id="channelId">ID: -</div>
+        </div>
+    </div>
+    
+    <div class="shaka-video-container" data-shaka-player>
+        <video autoplay playsinline preload="auto"></video>
+    </div>
+    
+    <div class="loading" id="loadingMessage">
+        Loading player and channel data...
+    </div>
+    
+    <div class="error hidden" id="errorMessage">
+        <h2>Error Loading Channel</h2>
+        <p id="errorText"></p>
+    </div>
+    
+    <div class="control-hint">Move mouse to show controls</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', async () => {
-  shaka.polyfill.installAll();
-  if (!shaka.Player.isBrowserSupported()) {
-    console.error('Browser not supported');
-    return;
-  }
-
-  const video = document.querySelector('video');
-  const player = new shaka.Player(video);
-
-  const container = document.querySelector('.shaka-video-container');
-  const ui = new shaka.ui.Overlay(player, container, video);
-
-  ui.configure({
-    controlPanelElements: [
-      'play_pause','time_and_duration','mute','volume',
-      'spacer','language','captions','picture_in_picture',
-      'quality','fullscreen'
-    ]
-  });
-
-  let cookieHeader = "";
-  let streamUrl = "";
-  let drmConfig = { clearKeys: {} };
-
-  // fetch m3u file and extract details
-  async function fetchChannelConfig(channelId="1373") {
-    try {
-      const res = await fetch("https://raw.githubusercontent.com/alex8875/m3u/refs/heads/main/jstar.m3u",{cache:"no-store"});
-      if(!res.ok) throw new Error("HTTP "+res.status);
-      const text = await res.text();
-
-      // split per channel
-      const blocks = text.split("#EXTINF").map(b => b.trim()).filter(b => b);
-      const block = blocks.find(b => b.includes(`tvg-id="${channelId}"`));
-      if(!block) throw new Error("Channel not found in m3u");
-
-      // license key
-      const licMatch = block.match(/#KODIPROP:inputstream\.adaptive\.license_key=(.*)/);
-      if(licMatch) {
-        const [k,v] = licMatch[1].split(":");
-        drmConfig.clearKeys = { [k]: v };
-      }
-
-      // cookie
-      const cookieMatch = block.match(/#EXTHTTP:\{"cookie":"([^"]+)"/);
-      if(cookieMatch) cookieHeader = cookieMatch[1];
-
-      // url
-      const urlMatch = block.match(/https[^\s]+\.mpd[^\s]*/);
-      if(urlMatch) streamUrl = urlMatch[0];
-
-      console.log("Config loaded:", {drmConfig, cookieHeader, streamUrl});
-      return true;
-    } catch(err) {
-      console.error("Failed to fetch channel config:", err);
-      return false;
-    }
-  }
-
-  // initial fetch for channel 1373
-  await fetchChannelConfig("1373");
-
-  // refresh every 5 min
-  setInterval(()=>fetchChannelConfig("1373"), 5*60*1000);
-
-  player.configure({
-    drm: drmConfig,
-    streaming: {
-      lowLatencyMode: true,
-      bufferingGoal: 15,
-      rebufferingGoal: 2
-    }
-  });
-
-  player.getNetworkingEngine().registerRequestFilter((type, request) => {
-    request.headers['Referer'] = 'https://www.jiotv.com/';
-    request.headers['User-Agent'] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
-    if(cookieHeader) request.headers['Cookie'] = cookieHeader;
-  });
-
-  try {
-    await player.load(streamUrl);
-    await video.play().catch(()=>{ video.muted=true; video.play(); });
-  } catch(err) {
-    console.error("Load error:", err);
-  }
-});
-</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize variables
+            let player;
+            let ui;
+            let currentChannel = null;
+            
+            const video = document.querySelector('video');
+            const container = document.querySelector('.shaka-video-container');
+            const channelInfo = document.getElementById('channelInfo');
+            const channelLogo = document.getElementById('channelLogo');
+            const channelName = document.getElementById('channelName');
+            const channelId = document.getElementById('channelId');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            
+            // Get channel ID from URL parameters
+            function getChannelIdFromUrl() {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get('id');
+            }
+            
+            // Show error message
+            function showError(message) {
+                errorText.textContent = message;
+                errorMessage.classList.remove('hidden');
+                loadingMessage.style.display = 'none';
+                console.error('Error:', message);
+            }
+            
+            // Hide channel info after a delay
+            function hideChannelInfo() {
+                setTimeout(() => {
+                    channelInfo.classList.add('hidden');
+                }, 5000);
+            }
+            
+            // Initialize Shaka Player
+            async function initPlayer() {
+                try {
+                    shaka.polyfill.installAll();
+                    
+                    if (!shaka.Player.isBrowserSupported()) {
+                        throw new Error('Browser not supported by Shaka Player');
+                    }
+                    
+                    player = new shaka.Player();
+                    await player.attach(video);
+                    
+                    ui = new shaka.ui.Overlay(player, container, video);
+                    
+                    ui.configure({
+                        controlPanelElements: [
+                            'play_pause', 'time_and_duration', 'mute', 'volume',
+                            'spacer', 'language', 'captions', 'picture_in_picture',
+                            'quality', 'fullscreen'
+                        ],
+                        volumeBarColors: {
+                            base: 'rgba(63, 187, 1, 1)',
+                            level: 'rgb(255, 69, 0)'
+                        },
+                        seekBarColors: {
+                            base: 'rgb(41, 41, 163)',
+                            buffered: 'rgb(35, 99, 3)',
+                            played: 'rgba(63, 187, 1, 1)'
+                        }
+                    });
+                    
+                    return true;
+                } catch (error) {
+                    showError('Error initializing player: ' + error.message);
+                    return false;
+                }
+            }
+            
+            // Parse M3U8 content and find the specific channel
+            function findChannelInM3U(content, targetId) {
+                const lines = content.split('\n');
+                let currentChannel = {};
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    
+                    if (line.startsWith('#EXTINF:')) {
+                        // Parse channel info
+                        const infoMatch = line.match(/#EXTINF:.*?tvg-id="(\d+)".*?tvg-logo="([^"]+)".*?,(.*)$/);
+                        if (infoMatch) {
+                            currentChannel = {
+                                id: infoMatch[1],
+                                logo: infoMatch[2],
+                                name: infoMatch[3].trim(),
+                                licenseKey: '',
+                                cookie: '',
+                                streamUrl: ''
+                            };
+                        }
+                    } else if (line.startsWith('#KODIPROP:inputstream.adaptive.license_key=')) {
+                        // Parse license key
+                        const keyMatch = line.match(/license_key=([^:\s]+):([^\s]+)/);
+                        if (keyMatch) {
+                            currentChannel.licenseKey = `${keyMatch[1]}:${keyMatch[2]}`;
+                        }
+                    } else if (line.startsWith('#EXTHTTP:')) {
+                        // Parse cookie
+                        try {
+                            const jsonMatch = line.match(/#EXTHTTP:\s*(\{.*\})/);
+                            if (jsonMatch) {
+                                const data = JSON.parse(jsonMatch[1]);
+                                if (data.cookie) {
+                                    currentChannel.cookie = data.cookie;
+                                }
+                            }
+                        } catch (e) {
+                            console.error('Error parsing cookie JSON:', e);
+                        }
+                    } else if (line.startsWith('http')) {
+                        // This is the stream URL
+                        currentChannel.streamUrl = line;
+                        
+                        // If this is the channel we're looking for, return it
+                        if (currentChannel.id === targetId) {
+                            return currentChannel;
+                        }
+                        
+                        // Reset for next channel
+                        currentChannel = {};
+                    }
+                }
+                
+                return null;
+            }
+            
+            // Fetch M3U8 playlist and find the specific channel
+            async function fetchChannel() {
+                const channelId = getChannelIdFromUrl();
+                
+                if (!channelId) {
+                    showError('No channel ID specified in URL. Add ?id=CHANNEL_ID to the URL');
+                    return null;
+                }
+                
+                try {
+                    loadingMessage.textContent = `Loading channel ${channelId}...`;
+                    const response = await fetch('https://raw.githubusercontent.com/alex8875/m3u/main/jstar.m3u');
+                    
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch M3U8 playlist: HTTP ${response.status}`);
+                    }
+                    
+                    const content = await response.text();
+                    const channel = findChannelInM3U(content, channelId);
+                    
+                    if (!channel) {
+                        throw new Error(`Channel with ID ${channelId} not found in the playlist`);
+                    }
+                    
+                    return channel;
+                } catch (error) {
+                    showError('Error loading channel: ' + error.message);
+                    return null;
+                }
+            }
+            
+            // Load a channel
+            async function loadChannel(channel) {
+                if (!player) {
+                    showError("Player not initialized yet");
+                    return;
+                }
+                
+                try {
+                    // Update channel info
+                    channelLogo.src = channel.logo;
+                    channelName.textContent = channel.name;
+                    channelId.textContent = `ID: ${channel.id}`;
+                    channelInfo.classList.remove('hidden');
+                    hideChannelInfo();
+                    
+                    currentChannel = channel;
+                    
+                    // Configure DRM
+                    const [keyId, keyValue] = channel.licenseKey.split(':');
+                    const drmConfig = {
+                        clearKeys: {
+                            [keyId]: keyValue
+                        }
+                    };
+                    
+                    player.configure({
+                        drm: drmConfig,
+                        streaming: {
+                            lowLatencyMode: true,
+                            bufferingGoal: 15,
+                            rebufferingGoal: 2,
+                            bufferBehind: 15,
+                            retryParameters: {
+                                timeout: 10000,
+                                maxAttempts: 5,
+                                baseDelay: 300,
+                                backoffFactor: 1.2
+                            },
+                            segmentRequestTimeout: 8000,
+                            segmentPrefetchLimit: 2,
+                            useNativeHlsOnSafari: true
+                        },
+                        manifest: {
+                            retryParameters: {
+                                timeout: 8000,
+                                maxAttempts: 3
+                            }
+                        }
+                    });
+                    
+                    // Register request filter to add cookies and headers
+                    player.getNetworkingEngine().registerRequestFilter((type, request) => {
+                        request.headers['Referer'] = 'https://www.jiotv.com/';
+                        request.headers['User-Agent'] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
+                        
+                        if (channel.cookie) {
+                            request.headers['Cookie'] = channel.cookie;
+                            
+                            if ((type === shaka.net.NetworkingEngine.RequestType.MANIFEST ||
+                                 type === shaka.net.NetworkingEngine.RequestType.SEGMENT) &&
+                                request.uris[0] && !request.uris[0].includes('__hdnea__=')) {
+                                const separator = request.uris[0].includes('?') ? '&' : '?';
+                                request.uris[0] += separator + channel.cookie;
+                            }
+                        }
+                    });
+                    
+                    // Load the stream
+                    await player.load(channel.streamUrl);
+                    loadingMessage.style.display = 'none';
+                    
+                    // Try to autoplay
+                    try {
+                        await video.play();
+                    } catch (error) {
+                        console.log('Autoplay prevented:', error);
+                        // User interaction will be required to start playback
+                    }
+                } catch (error) {
+                    showError('Error loading channel stream: ' + error.message);
+                }
+            }
+            
+            // Initialize everything
+            async function init() {
+                const playerInitialized = await initPlayer();
+                if (!playerInitialized) {
+                    return;
+                }
+                
+                const channel = await fetchChannel();
+                if (channel) {
+                    await loadChannel(channel);
+                }
+            }
+            
+            // Start initialization
+            init();
+            
+            // Handle user interaction for audio
+            let hasUserInteracted = false;
+            const enableSoundOnInteraction = () => {
+                if (!hasUserInteracted && video.muted) {
+                    video.muted = false;
+                    hasUserInteracted = true;
+                }
+            };
+            
+            ['click', 'touchstart', 'keydown'].forEach(event => {
+                document.addEventListener(event, enableSoundOnInteraction, { once: true });
+            });
+            
+            // Show channel info when mouse moves
+            document.addEventListener('mousemove', () => {
+                channelInfo.classList.remove('hidden');
+                hideChannelInfo();
+            });
+        });
+    </script>
 </body>
 </html>
