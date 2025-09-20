@@ -1,0 +1,125 @@
+
+<!DOCTYPE html><html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.ui.min.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/controls.min.css" crossorigin="anonymous">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      background: #000;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .shaka-video-container {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      object-fit: contain;
+    }
+    .shaka-spinner-container,
+    .shaka-spinner,
+    .shaka-spinner-svg {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="shaka-video-container" data-shaka-player>
+    <video autoplay playsinline preload="metadata" poster="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiii7YNuRJBQ43RMlbokkmeBefH1FnRTS8zOQmr0K4MA&s=10"></video>
+  </div>  
+  <script>
+document.addEventListener('DOMContentLoaded', async () => {
+  shaka.polyfill.installAll();
+  if (!shaka.Player.isBrowserSupported()) {
+    console.error("Browser not supported");
+    return;
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const channelId = urlParams.get("id") || "1373"; // default Disney Channel
+  const m3uUrl = "https://raw.githubusercontent.com/alex8875/m3u/refs/heads/main/jstar.m3u";
+
+  const video = document.querySelector("video");
+  const player = new shaka.Player(video);
+  const container = document.querySelector(".shaka-video-container");
+  const ui = new shaka.ui.Overlay(player, container, video);
+
+  ui.configure({
+    controlPanelElements: [
+      "play_pause", "time_and_duration", "mute", "volume",
+      "spacer", "language", "captions", "picture_in_picture",
+      "quality", "fullscreen"
+    ]
+  });
+
+  async function fetchChannelInfo(id) {
+    const res = await fetch(m3uUrl, { cache: "no-store" });
+    const text = await res.text();
+    const blocks = text.split("#EXTINF").filter(b => b.includes(`tvg-id="${id}"`));
+    if (!blocks.length) throw new Error("Channel not found in playlist");
+
+    const block = blocks[0];
+
+    // Extract license_key
+    const keyMatch = block.match(/#KODIPROP:inputstream\.adaptive\.license_key=(.+)/);
+    const licenseKey = keyMatch ? keyMatch[1].trim() : null;
+    let drmConfig = {};
+    if (licenseKey) {
+      const [kid, key] = licenseKey.split(":");
+      drmConfig = { clearKeys: { [kid]: key } };
+    }
+
+    // Extract cookie
+    const cookieMatch = block.match(/#EXTHTTP:\{"cookie":"([^"]+)"\}/);
+    const cookieHeader = cookieMatch ? cookieMatch[1] : "";
+
+    // Extract manifest URL
+    const urlMatch = block.match(/https[^\s]+\.mpd[^\s]*/);
+    const manifestUrl = urlMatch ? urlMatch[0] : null;
+
+    return { drmConfig, cookieHeader, manifestUrl };
+  }
+
+  const { drmConfig, cookieHeader, manifestUrl } = await fetchChannelInfo(channelId);
+
+  player.configure({
+    drm: drmConfig,
+    streaming: {
+      lowLatencyMode: true,
+      bufferingGoal: 15,
+      rebufferingGoal: 2
+    }
+  });
+
+  // Attach headers
+  player.getNetworkingEngine().registerRequestFilter((type, request) => {
+    request.headers["Referer"] = "https://www.jiotv.com/";
+    request.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
+    if (cookieHeader) {
+      request.headers["Cookie"] = cookieHeader;
+    }
+  });
+
+  try {
+    await player.load(manifestUrl);
+    console.log("Playing:", manifestUrl);
+  } catch (err) {
+    console.error("Load error:", err);
+  }
+});
+</script>
+</body>
+</html>
