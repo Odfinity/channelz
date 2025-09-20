@@ -1,544 +1,133 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JioTV Channel Player</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.ui.min.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/controls.min.css" crossorigin="anonymous">
-    <style>
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-        }
-        
-        body {
-            background: #0f172a;
-            color: #e2e8f0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        header {
-            background: linear-gradient(90deg, #1e3a8a 0%, #0f172a 100%);
-            padding: 1rem;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-            color: #fff;
-        }
-        
-        .container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-        
-        .sidebar {
-            width: 280px;
-            background: #1e293b;
-            overflow-y: auto;
-            padding: 1rem;
-            transition: all 0.3s ease;
-        }
-        
-        .channel-list {
-            list-style: none;
-        }
-        
-        .channel-item {
-            padding: 0.8rem;
-            margin-bottom: 0.5rem;
-            background: #334155;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-        }
-        
-        .channel-item:hover {
-            background: #475569;
-            transform: translateX(5px);
-        }
-        
-        .channel-item.active {
-            background: #3b82f6;
-            color: white;
-        }
-        
-        .channel-logo {
-            width: 30px;
-            height: 30px;
-            margin-right: 10px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        
-        .player-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-        
-        .shaka-video-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background: #000;
-        }
-        
-        video {
-            width: 100%;
-            height: 100%;
-            background: #000;
-            object-fit: contain;
-        }
-        
-        .channel-info {
-            padding: 1rem;
-            background: rgba(0, 0, 0, 0.7);
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-        }
-        
-        .channel-info img {
-            width: 40px;
-            height: 40px;
-            margin-right: 15px;
-            border-radius: 8px;
-        }
-        
-        .loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 1.2rem;
-            z-index: 5;
-        }
-        
-        .shaka-spinner-container,
-        .shaka-spinner,
-        .shaka-spinner-svg {
-            display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-        }
-        
-        .search-box {
-            margin-bottom: 1rem;
-        }
-        
-        .search-box input {
-            width: 100%;
-            padding: 0.7rem;
-            border-radius: 25px;
-            border: none;
-            background: #334155;
-            color: white;
-            outline: none;
-        }
-        
-        .search-box input::placeholder {
-            color: #94a3b8;
-        }
-        
-        .status {
-            padding: 0.5rem;
-            text-align: center;
-            background: #1e293b;
-            font-size: 0.9rem;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                max-height: 200px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.ui.min.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/controls.min.css" crossorigin="anonymous">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      background: #000;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .shaka-video-container {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      object-fit: contain;
+    }
+    .shaka-spinner-container,
+    .shaka-spinner,
+    .shaka-spinner-svg {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>JioTV Channel Player</h1>
-        <p>Select a channel from the list to start streaming</p>
-    </header>
-    
-    <div class="container">
-        <div class="sidebar">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Search channels...">
-            </div>
-            <ul class="channel-list" id="channelList">
-                <li class="channel-item">Loading channels...</li>
-            </ul>
-        </div>
-        
-        <div class="player-container">
-            <div class="channel-info" id="channelInfo" style="display: none;">
-                <img id="currentChannelLogo" src="" alt="Channel Logo">
-                <div>
-                    <h3 id="currentChannelName">Channel Name</h3>
-                    <p id="currentChannelId">ID: Loading...</p>
-                </div>
-            </div>
-            
-            <div class="shaka-video-container" data-shaka-player>
-                <video autoplay playsinline preload="metadata" 
-                       poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2MDAiIHZpZXdCb3g9IjAgMCAxMjAwIDYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjIyIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkppb1RWIFBsYXllcjwvdGV4dD48L3N2Zz4=">
-                </video>
-            </div>
-            
-            <div class="loading" id="loadingMessage">
-                Loading player and channel data...
-            </div>
-        </div>
-    </div>
-    
-    <div class="status" id="statusBar">
-        Loading M3U8 playlist from GitHub...
-    </div>
+  <div class="shaka-video-container" data-shaka-player>
+    <video autoplay playsinline preload="metadata"
+      poster="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiii7YNuRJBQ43RMlbokkmeBefH1FnRTS8zOQmr0K4MA&s=10"></video>
+  </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Initialize variables
-            let player;
-            let ui;
-            let channels = [];
-            let currentChannel = null;
-            
-            const video = document.querySelector('video');
-            const container = document.querySelector('.shaka-video-container');
-            const channelList = document.getElementById('channelList');
-            const channelInfo = document.getElementById('channelInfo');
-            const currentChannelLogo = document.getElementById('currentChannelLogo');
-            const currentChannelName = document.getElementById('currentChannelName');
-            const currentChannelId = document.getElementById('currentChannelId');
-            const loadingMessage = document.getElementById('loadingMessage');
-            const statusBar = document.getElementById('statusBar');
-            const searchInput = document.getElementById('searchInput');
-            
-            // Update status message
-            function updateStatus(message) {
-                statusBar.textContent = message;
-                console.log(message);
-            }
-            
-            // Initialize Shaka Player
-            async function initPlayer() {
-                try {
-                    shaka.polyfill.installAll();
-                    
-                    if (!shaka.Player.isBrowserSupported()) {
-                        throw new Error('Browser not supported by Shaka Player');
-                    }
-                    
-                    player = new shaka.Player();
-                    await player.attach(video);
-                    
-                    ui = new shaka.ui.Overlay(player, container, video);
-                    
-                    ui.configure({
-                        controlPanelElements: [
-                            'play_pause', 'time_and_duration', 'mute', 'volume',
-                            'spacer', 'language', 'captions', 'picture_in_picture',
-                            'quality', 'fullscreen'
-                        ],
-                        volumeBarColors: {
-                            base: 'rgba(63, 187, 1, 1)',
-                            level: 'rgb(255, 69, 0)'
-                        },
-                        seekBarColors: {
-                            base: 'rgb(41, 41, 163)',
-                            buffered: 'rgb(35, 99, 3)',
-                            played: 'rgba(63, 187, 1, 1)'
-                        }
-                    });
-                    
-                    updateStatus("Player initialized successfully");
-                    return true;
-                } catch (error) {
-                    console.error('Error initializing player:', error);
-                    updateStatus("Error initializing player: " + error.message);
-                    return false;
-                }
-            }
-            
-            // Parse M3U8 content
-            function parseM3U8Content(content) {
-                const lines = content.split('\n');
-                const channels = [];
-                let currentChannel = {};
-                
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    
-                    if (line.startsWith('#EXTINF:')) {
-                        // Parse channel info
-                        const infoMatch = line.match(/#EXTINF:.*?tvg-id="(\d+)".*?tvg-logo="([^"]+)".*?,(.*)$/);
-                        if (infoMatch) {
-                            currentChannel = {
-                                id: infoMatch[1],
-                                logo: infoMatch[2],
-                                name: infoMatch[3].trim(),
-                                licenseKey: '',
-                                cookie: '',
-                                streamUrl: ''
-                            };
-                        }
-                    } else if (line.startsWith('#KODIPROP:inputstream.adaptive.license_key=')) {
-                        // Parse license key
-                        const keyMatch = line.match(/license_key=([^:\s]+):([^\s]+)/);
-                        if (keyMatch) {
-                            currentChannel.licenseKey = `${keyMatch[1]}:${keyMatch[2]}`;
-                        }
-                    } else if (line.startsWith('#EXTHTTP:')) {
-                        // Parse cookie
-                        try {
-                            const jsonMatch = line.match(/#EXTHTTP:\s*(\{.*\})/);
-                            if (jsonMatch) {
-                                const data = JSON.parse(jsonMatch[1]);
-                                if (data.cookie) {
-                                    currentChannel.cookie = data.cookie;
-                                }
-                            }
-                        } catch (e) {
-                            console.error('Error parsing cookie JSON:', e);
-                        }
-                    } else if (line.startsWith('http')) {
-                        // This is the stream URL
-                        currentChannel.streamUrl = line;
-                        
-                        // Add the channel to the list if we have all required data
-                        if (currentChannel.id && currentChannel.name && currentChannel.licenseKey && currentChannel.cookie) {
-                            channels.push({...currentChannel});
-                        }
-                        
-                        // Reset for next channel
-                        currentChannel = {};
-                    }
-                }
-                
-                return channels;
-            }
-            
-            // Fetch M3U8 playlist
-            async function fetchM3U8Playlist() {
-                try {
-                    updateStatus("Fetching M3U8 playlist from GitHub...");
-                    const response = await fetch('https://raw.githubusercontent.com/alex8875/m3u/main/jstar.m3u');
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    
-                    const content = await response.text();
-                    updateStatus("M3U8 playlist fetched successfully");
-                    
-                    return parseM3U8Content(content);
-                } catch (error) {
-                    console.error('Error fetching M3U8 playlist:', error);
-                    updateStatus("Error fetching M3U8 playlist: " + error.message);
-                    return [];
-                }
-            }
-            
-            // Display channels in the sidebar
-            function displayChannels(channelListData) {
-                channelList.innerHTML = '';
-                
-                if (channelListData.length === 0) {
-                    channelList.innerHTML = '<li class="channel-item">No channels found</li>';
-                    return;
-                }
-                
-                channelListData.forEach(channel => {
-                    const li = document.createElement('li');
-                    li.className = 'channel-item';
-                    li.dataset.id = channel.id;
-                    
-                    li.innerHTML = `
-                        <img src="${channel.logo}" alt="${channel.name}" class="channel-logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iMzAiIHZpZXdCb3g9IjAgMCAzMCAzMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNSIgY3k9IjE1IiByPSIxNSIgZmlsbD0iIzQ5NTA1NyIvPjx0ZXh0IHg9IjE1IiB5PSIxOCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5UVjwvdGV4dD48L3N2Zz4='">
-                        <span>${channel.name}</span>
-                    `;
-                    
-                    li.addEventListener('click', () => {
-                        // Remove active class from all items
-                        document.querySelectorAll('.channel-item').forEach(item => {
-                            item.classList.remove('active');
-                        });
-                        
-                        // Add active class to clicked item
-                        li.classList.add('active');
-                        
-                        // Load the channel
-                        loadChannel(channel);
-                    });
-                    
-                    channelList.appendChild(li);
-                });
-                
-                // Make first channel active by default
-                if (channelListData.length > 0) {
-                    const firstChannel = channelListData[0];
-                    const firstItem = channelList.querySelector(`[data-id="${firstChannel.id}"]`);
-                    if (firstItem) {
-                        firstItem.classList.add('active');
-                        loadChannel(firstChannel);
-                    }
-                }
-            }
-            
-            // Load a channel
-            async function loadChannel(channel) {
-                if (!player) {
-                    updateStatus("Player not initialized yet");
-                    return;
-                }
-                
-                try {
-                    updateStatus(`Loading channel: ${channel.name}`);
-                    loadingMessage.style.display = 'block';
-                    channelInfo.style.display = 'flex';
-                    
-                    // Update channel info
-                    currentChannelLogo.src = channel.logo;
-                    currentChannelName.textContent = channel.name;
-                    currentChannelId.textContent = `ID: ${channel.id}`;
-                    currentChannel = channel;
-                    
-                    // Configure DRM
-                    const [keyId, keyValue] = channel.licenseKey.split(':');
-                    const drmConfig = {
-                        clearKeys: {
-                            [keyId]: keyValue
-                        }
-                    };
-                    
-                    player.configure({
-                        drm: drmConfig,
-                        streaming: {
-                            lowLatencyMode: true,
-                            bufferingGoal: 15,
-                            rebufferingGoal: 2,
-                            bufferBehind: 15,
-                            retryParameters: {
-                                timeout: 10000,
-                                maxAttempts: 5,
-                                baseDelay: 300,
-                                backoffFactor: 1.2
-                            },
-                            segmentRequestTimeout: 8000,
-                            segmentPrefetchLimit: 2,
-                            useNativeHlsOnSafari: true
-                        },
-                        manifest: {
-                            retryParameters: {
-                                timeout: 8000,
-                                maxAttempts: 3
-                            }
-                        }
-                    });
-                    
-                    // Register request filter to add cookies and headers
-                    player.getNetworkingEngine().registerRequestFilter((type, request) => {
-                        request.headers['Referer'] = 'https://www.jiotv.com/';
-                        request.headers['User-Agent'] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
-                        
-                        if (channel.cookie) {
-                            request.headers['Cookie'] = channel.cookie;
-                            
-                            if ((type === shaka.net.NetworkingEngine.RequestType.MANIFEST ||
-                                 type === shaka.net.NetworkingEngine.RequestType.SEGMENT) &&
-                                request.uris[0] && !request.uris[0].includes('__hdnea__=')) {
-                                const separator = request.uris[0].includes('?') ? '&' : '?';
-                                request.uris[0] += separator + channel.cookie;
-                            }
-                        }
-                    });
-                    
-                    // Load the stream
-                    await player.load(channel.streamUrl);
-                    loadingMessage.style.display = 'none';
-                    updateStatus(`Now playing: ${channel.name}`);
-                    
-                    // Try to autoplay
-                    try {
-                        await video.play();
-                    } catch (error) {
-                        console.log('Autoplay prevented:', error);
-                        // User interaction will be required to start playback
-                    }
-                } catch (error) {
-                    console.error('Error loading channel:', error);
-                    updateStatus(`Error loading channel: ${error.message}`);
-                    loadingMessage.style.display = 'none';
-                }
-            }
-            
-            // Search functionality
-            searchInput.addEventListener('input', () => {
-                const searchTerm = searchInput.value.toLowerCase();
-                const filteredChannels = channels.filter(channel => 
-                    channel.name.toLowerCase().includes(searchTerm) || 
-                    channel.id.includes(searchTerm)
-                );
-                
-                displayChannels(filteredChannels);
-            });
-            
-            // Initialize everything
-            async function init() {
-                const playerInitialized = await initPlayer();
-                if (!playerInitialized) {
-                    return;
-                }
-                
-                channels = await fetchM3U8Playlist();
-                if (channels.length > 0) {
-                    displayChannels(channels);
-                    updateStatus(`Loaded ${channels.length} channels`);
-                } else {
-                    updateStatus("No channels available");
-                }
-            }
-            
-            // Start initialization
-            init();
-            
-            // Handle user interaction for audio
-            let hasUserInteracted = false;
-            const enableSoundOnInteraction = () => {
-                if (!hasUserInteracted && video.muted) {
-                    video.muted = false;
-                    hasUserInteracted = true;
-                    updateStatus("Sound enabled after user interaction");
-                }
-            };
-            
-            ['click', 'touchstart', 'keydown'].forEach(event => {
-                document.addEventListener(event, enableSoundOnInteraction, { once: true });
-            });
-        });
-    </script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  shaka.polyfill.installAll();
+  if (!shaka.Player.isBrowserSupported()) {
+    console.error('Browser not supported');
+    return;
+  }
+
+  const video = document.querySelector('video');
+  const player = new shaka.Player(video);
+
+  const container = document.querySelector('.shaka-video-container');
+  const ui = new shaka.ui.Overlay(player, container, video);
+
+  ui.configure({
+    controlPanelElements: [
+      'play_pause','time_and_duration','mute','volume',
+      'spacer','language','captions','picture_in_picture',
+      'quality','fullscreen'
+    ]
+  });
+
+  let cookieHeader = "";
+  let streamUrl = "";
+  let drmConfig = { clearKeys: {} };
+
+  // fetch m3u file and extract details
+  async function fetchChannelConfig(channelId="1373") {
+    try {
+      const res = await fetch("https://raw.githubusercontent.com/alex8875/m3u/refs/heads/main/jstar.m3u",{cache:"no-store"});
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      const text = await res.text();
+
+      // split per channel
+      const blocks = text.split("#EXTINF").map(b => b.trim()).filter(b => b);
+      const block = blocks.find(b => b.includes(`tvg-id="${channelId}"`));
+      if(!block) throw new Error("Channel not found in m3u");
+
+      // license key
+      const licMatch = block.match(/#KODIPROP:inputstream\.adaptive\.license_key=(.*)/);
+      if(licMatch) {
+        const [k,v] = licMatch[1].split(":");
+        drmConfig.clearKeys = { [k]: v };
+      }
+
+      // cookie
+      const cookieMatch = block.match(/#EXTHTTP:\{"cookie":"([^"]+)"/);
+      if(cookieMatch) cookieHeader = cookieMatch[1];
+
+      // url
+      const urlMatch = block.match(/https[^\s]+\.mpd[^\s]*/);
+      if(urlMatch) streamUrl = urlMatch[0];
+
+      console.log("Config loaded:", {drmConfig, cookieHeader, streamUrl});
+      return true;
+    } catch(err) {
+      console.error("Failed to fetch channel config:", err);
+      return false;
+    }
+  }
+
+  // initial fetch for channel 1373
+  await fetchChannelConfig("1373");
+
+  // refresh every 5 min
+  setInterval(()=>fetchChannelConfig("1373"), 5*60*1000);
+
+  player.configure({
+    drm: drmConfig,
+    streaming: {
+      lowLatencyMode: true,
+      bufferingGoal: 15,
+      rebufferingGoal: 2
+    }
+  });
+
+  player.getNetworkingEngine().registerRequestFilter((type, request) => {
+    request.headers['Referer'] = 'https://www.jiotv.com/';
+    request.headers['User-Agent'] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
+    if(cookieHeader) request.headers['Cookie'] = cookieHeader;
+  });
+
+  try {
+    await player.load(streamUrl);
+    await video.play().catch(()=>{ video.muted=true; video.play(); });
+  } catch(err) {
+    console.error("Load error:", err);
+  }
+});
+</script>
 </body>
 </html>
