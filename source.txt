@@ -1,3 +1,5 @@
 criclife max
 https://b-player.pages.dev/drm?url=https://ev-fast-mpd.starzplayarabia.com/live/eds/CricLifeMax/DASH/CricLifeMax.mpd&key=ad59b720bd4b44d063686212b99484b5:e1744990edf98acc729c0773a3766583
 
+astro
+https://odfinity.github.io/channelz/astro
