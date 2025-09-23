@@ -1,165 +1,120 @@
 
 <!DOCTYPE html>
 <html>
-
 <head>
-    <title>Astro</title>
-    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/2048px-Telegram_logo.svg.png" type="image/png" sizes="250x250">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.1.1/shaka-player.ui.min.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.1.1/controls.min.css" crossorigin="anonymous">
-    <link rel="preload" href="https://astr0-proxy.vercel.app/2504/default_ott.mpd" as="fetch" crossorigin="anonymous">
-
-    <style>
-        /* Overflow menu style */
-        .shaka-overflow-menu {
-            background-color: rgb(41, 41, 163);
-            color: rgb(153, 153, 153);
-        }
-
-        .shaka-overflow-menu button:hover {
-            background-color: rgb(45, 45, 45);
-        }
-
-        .shaka-overflow-button-label {
-            color: rgb(245, 245, 245);
-        }
-
-        .shaka-current-selection-span {
-            color: rgb(202, 202, 202);
-        }
-
-        .material-icons-round {
-            color: rgb(230, 230, 230);
-        }
-
-        /* Overflow sub menu style */
-        .shaka-settings-menu {
-            background-color: rgb(35, 35, 35);
-            color: rgb(255, 255, 255);
-        }
-
-        .shaka-settings-menu button {
-            color: rgb(255, 255, 255);
-        }
-
-        .shaka-settings-menu button:hover {
-            background-color: rgb(45, 45, 45);
-        }
-    </style>
-</head>
-
-<body bgcolor="black" style="margin:0">
-    <center>
-        <div data-shaka-player-container style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">
-            <video autoplay muted playsinline data-shaka-player id="video"
-                   poster="https://i.ibb.co/4nkJF7Dd/Axtream-Bingewav.png?width=1920&height=1080&mode=max&slimmage=true"
-                   style="width:100%;height:100%"></video>
-        </div>
-    </center>
-
-    <script>
-
-        async function init() {let e = document.getElementById("video"),r = e.ui,n = r.getControls(),o = n.getPlayer();o.configure({drm:{clearKeys:{"03c2e0af2f8159f9f0ce9b5dbc865f10":"cd84ed136b0cc71f8ab8cd4d4f6a2e4c"}},streaming: {startAtSegmentBoundary: true,ignoreTextStreamFailures: true, rebufferingGoal: 1,bufferingGoal: 3,bufferBehind: 5, autoLowLatencyMode: true, lowLatencyMode: true, jumpLargeGaps: true, inaccurateManifestTolerance: 0.3, stallEnabled: false},manifest: {dash: {ignoreMinBufferTime: true, autoCorrectDrift: true}}});r.configure({
-                controlPanelElements: ["play_pause", "mute", "volume", "spacer", "time_and_duration", "quality", "picture_in_picture", "fullscreen", "overflow_menu"],
-                volumeBarColors: { base: 'rgba(235, 235, 235, 1)', level: 'rgb(255, 255, 255)' },
-                seekBarColors: { base: 'rgb(199, 199, 199)', buffered: 'rgb(255, 255, 255)', played: 'rgba(255, 255, 255, 1)' }
-            });
-
-            window.player = o;
-            window.ui = r;
-
-            o.addEventListener("error", onPlayerErrorEvent);
-            n.addEventListener("error", onUIErrorEvent);
-
-            // Load the video as quickly as possible
-            try {
-                await o.load("https://astr0-proxy.vercel.app/2504/default_ott.mpd");
-                console.log("The video has now been loaded instantly!");
-            } catch (a) {
-                onPlayerError(a);
-            }
-        }
-
-        function onPlayerErrorEvent(e) {
-            onPlayerError(e.detail);
-        }
-
-        function onPlayerError(e) {
-            console.error("Error code", e.code, "object", e);
-        }
-
-        function onUIErrorEvent(e) {
-            onPlayerError(e.detail);
-        }
-
-        function initFailed(e) {
-            console.error("Unable to load the UI library!");
-        }
-
-        document.addEventListener("shaka-ui-loaded", init);
-        document.addEventListener("shaka-ui-load-failed", initFailed);
-    </script>
-    <script>
- // Close popup function
- function closePopup() {
-    const popup = document.getElementById('popup');
-    popup.style.display = 'none';
-  }
-      // Show the alert
-      if (confirm("Join Our Telegram Channel @Axtream_Bingewav for updates and more")) {
-          // Redirect to the Telegram channel if 'OK' is clicked
-          window.location.href = "https://t.me/axtream_bingewav";
-      } else {
-          // Close the alert if 'Cancel' is clicked (do nothing)
-      }
-
-
-(function() {
-    const allowedDomains = [
-        "bingewav-sports.netlify.app",
-        "cricstreamline365.netlify.app",
-        "editverseog.netlify.app",
-        "cricket-nation.live",
-        "cricketgroup.netlify.app",
-        "crxcshivam.live",
-        "binge-play.vercel.app",
-        "champions-trophy.vercel.app",
-        "sportifylive18.pages.dev"
-    ];
-
-    try {
-        // Check if the page is embedded in an iframe
-        if (window.top !== window.self) {
-            // Extract the referrer domain
-            const referrer = document.referrer;
-            if (referrer) {
-                const referrerDomain = new URL(referrer).hostname;
-
-                // Allow embedding only if the domain is in the allowed list
-                if (!allowedDomains.includes(referrerDomain)) {
-                    document.body.innerHTML = `<h1 style="text-align:center; margin-top:20%; color:red;">Embedding not allowed!</h1>`;
-                    throw new Error("Embedding not allowed on this domain.");
-                }
-            } else {
-                // No referrer, block embedding
-                document.body.innerHTML = `<h1 style="text-align:center; margin-top:20%; color:red;">Embedding not allowed!</h1>`;
-                throw new Error("Embedding not allowed! No referrer detected.");
-            }
-        }
-    } catch (error) {
-        console.error("Error checking embed permissions:", error);
-        document.body.innerHTML = `<div style="text-align:center; margin-top:20%; color:#ff3333; font-family:Arial, sans-serif;">
-        <h1>Access Denied</h1>
-        <p><h2>This page cannot be embedded on your site.</h2></p>
-        <p><h2>For more information and to allow embeding on this domain, please contact the administrator <a href="https://t.me/axtream_bingewav" target="_blank" style="text-decoration: none; color: #ff00bb">@Axtream_Bingewav</a>.</h2></p>
-    </div>`;
+  <meta charset="UTF-8">
+  <title>Astro Cricket</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/shaka-player.ui.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/controls.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      background: #000;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, sans-serif;
     }
-})();
-    </script>
+    .shaka-video-container {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      object-fit: contain;
+    }
+    .shaka-spinner-container {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
 
+<div class="shaka-video-container" data-shaka-player>
+  <video autoplay playsinline preload="metadata"></video>
+</div>
 
-<script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  shaka.polyfill.installAll();
+
+  if (!shaka.Player.isBrowserSupported()) {
+    console.error('Browser not supported');
+    return;
+  }
+
+  const video = document.querySelector('video');
+  const player = new shaka.Player();
+  
+  await player.attach(video);
+
+  const container = document.querySelector('.shaka-video-container');
+  const ui = new shaka.ui.Overlay(player, container, video);
+  ui.getControls();
+
+  // Player configuration with DRM if available
+  const config = {
+    streaming: {
+      bufferingGoal: 30,
+      rebufferingGoal: 5,
+      bufferBehind: 30,
+      retryParameters: {
+        timeout: 15000,
+        maxAttempts: 3,
+        baseDelay: 500,
+        backoffFactor: 1.5
+      },
+      segmentRequestTimeout: 10000,
+      useNativeHlsOnSafari: true
+    },
+    manifest: {
+      retryParameters: {
+        timeout: 10000,
+        maxAttempts: 2
+      }
+    }
+  };
+
+  // Add DRM configuration if kid and key are provided
+    config.drm = {
+    clearKeys: {
+      "03c2e0af2f8159f9f0ce9b5dbc865f10": "cd84ed136b0cc71f8ab8cd4d4f6a2e4c"
+    }
+  };
+  
+  player.configure(config);
+
+  // Request filter for headers
+  player.getNetworkingEngine().registerRequestFilter((type, request) => {
+    request.headers['Referer'] = 'https://www.jiotv.com/';
+    
+        
+      });
+
+  // Error handling
+  player.addEventListener('error', (event) => {
+    console.error('Shaka Player Error:', event.detail);
+  });
+
+  // Auto fullscreen on play
+  video.addEventListener('play', () => {
+    if (!document.fullscreenElement) {
+      container.requestFullscreen().catch(() => {});
+    }
+  }, { once: true });
+
+  // Load stream
+  try {
+    await player.load("https://proxy.mydementiacompanion.com.au/https://linearjitp-playback.astro.com.my/dash-wv/linear/2504/default_ott.mpd");
+  } catch (error) {
+    console.error('Load error:', error);
+  }
+});
+</script>
+
 </body>
-
 </html>
